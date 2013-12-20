@@ -1,0 +1,16 @@
+{
+  "name": "globalify",
+  "version": "0.0.0",
+  "description": "",
+  "main": "globalify.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "module-deps": "1.1.x",
+    "commander": "~2.1.0"
+  },
+  "author": "",
+  "license": "BSD",
+  "modulesDirectory":"./modules"
+}
