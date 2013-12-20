@@ -3,13 +3,12 @@
 
 function globalify(){
     var program = require('commander'),
-        mdeps = require('module-deps'),
+        browserify = require('browserify'),
+        resumer = require('resumer'),
         path = require('path'),
         fs = require('fs'),
-        childProcess = require("child_process"),
-        exec = childProcess.exec,
+        npm = require("npm"),
         packageJson = require('./package.json'),
-        modulesDirectory = packageJson.modulesDirectory,
         moduleName = process.argv[2];
 
     program
@@ -17,31 +16,33 @@ function globalify(){
       .option('-g, --globalName [globalName]', 'the name of the global to expose')
       .parse(process.argv);
 
-    function getDeps(moduleDirectory, moduleName){
-        mdeps(path.join(moduleDirectory, moduleName)).on('data', function(){
-            console.log(arguments);
-        });
+    function globalifyModule(moduleName){
+        var stream = resumer().queue('window["' + (program.globalName || moduleName) + '"] = require("' + moduleName + '");').end();
+
+        var b = browserify([stream]);
+        b.bundle().pipe(process.stdout);
     }
 
     function instalModule(moduleName, version){
+        npm.load({ prefix: packageJson.modulesDirectory },
+            function (error) {
+                if(!error){
+                    globalifyModule(moduleName);
+                }
+                npm.config.set('dir', packageJson.modulesDirectory);
 
-        var moduleDirectory = path.join(modulesDirectory, moduleName + '_' + version);
+                npm.commands.install([moduleName], function (error, data) {
+                    if(error){
+                        console.log(error);
+                    }
 
-        if(fs.exists(moduleDirectory)){
-            getDeps(moduleDirectory, moduleName);
-            return;
-        }
+                    globalifyModule(moduleName);
+                });
+                npm.on("log", function (message) {
+                    console.log(message);
+                });
 
-        exec('npm --prefix ' + modulesDirectory + ' install ' + moduleName + '@"' + version + '"', function(error){
-            console.log(error);
-
-            var moduleDirectory = path.join(modulesDirectory, moduleName + '_' + version);
-
-            console.log(moduleDirectory);
-
-            getDeps(moduleDirectory, moduleName);
-
-        });
+        })
     }
 
     instalModule(moduleName, 'x.x.x');
