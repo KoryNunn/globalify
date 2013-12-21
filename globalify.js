@@ -1,5 +1,4 @@
-#! /usr/bin/env node
-
+#!/usr/bin/env node
 
 function globalify(){
     var program = require('commander'),
@@ -8,7 +7,7 @@ function globalify(){
         path = require('path'),
         fs = require('fs'),
         childProcess = require("child_process"),
-        exec = childProcess.exec;
+        exec = childProcess.exec,
         packageJson = require('./package.json'),
         moduleName = process.argv[2],
         version = process.argv[3] || 'x.x.x',
@@ -24,14 +23,17 @@ function globalify(){
         var stream = resumer().queue('window["' + (program.globalName || moduleName) + '"] = require("' + moduleName + '");').end();
         var b = browserify({
             entries: [stream],
-            //basedir: packageJson.modulesDirectory
+            basedir: path.resolve(process.cwd(), packageJson.modulesDirectory)
         });
         b.bundle(callback).pipe(fs.createWriteStream(outputFileName));
     }
 
     function instalModule(moduleName, version, callback){
-        exec('npm install ' + moduleName + '@"' + version + '"', function(error){
-        //exec('npm --prefix ' + packageJson.modulesDirectory + ' install ' + moduleName + '@"' + version + '"', function(error){
+       exec('npm install ' + moduleName + '@"' + version + '"',
+        {
+            cwd: path.resolve(process.cwd(), packageJson.modulesDirectory)
+        },
+        function(error){
             callback(error);
         }).stdout.pipe(process.stdout);
     }
