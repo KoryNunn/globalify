@@ -18,11 +18,9 @@ globalify({
         globalVariable: process.globalVariable,
         instalDirectory: packageJson.instalDirectory
     },
-    function(error, data){
+    function(error){
         if(error){
             //something
         }
     }
 ).pipe(fs.createWriteStream(outputFileName));
-
-globalify();

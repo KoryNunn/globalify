@@ -4,6 +4,7 @@ var browserify = require('browserify'),
     path = require('path'),
     childProcess = require("child_process"),
     exec = childProcess.exec,
+    stream = require('stream'),
     defaults = {
         installDirectory: './globalify_modules',
         version: 'x.x.x'
@@ -19,7 +20,9 @@ module.exports = function globalify(settings, callback){
 
     var moduleName = settings.module,
         version = settings.version,
-        outputFileName = moduleName + '-' + version.replace(/\./g,'-') + '.js';
+        outputFileName = moduleName + '-' + version.replace(/\./g,'-') + '.js',
+        outputStream = stream.PassThrough(),
+        bundleStream;
 
     function globalifyModule(moduleName, callback){
 
@@ -28,11 +31,15 @@ module.exports = function globalify(settings, callback){
             entries: [stream],
             basedir: path.resolve(process.cwd(), settings.installDirectory)
         });
-        return b.bundle(callback);
+
+        bundleStream = b.bundle(function(error){
+            callback(error);
+        });
     }
 
     function installModule(moduleName, version, callback){
-        var installDirectory = path.resolve(process.cwd(), settings.installDirectory);
+        var installDirectory = path.resolve(process.cwd(), settings.installDirectory),
+            packagePath = path.join(installDirectory, 'package.json');
 
         try {
             if(!fs.lstatSync(installDirectory).isDirectory()){
@@ -41,6 +48,12 @@ module.exports = function globalify(settings, callback){
         } catch (e) {
             // ...
         }
+
+        if(!fs.existsSync(packagePath)){
+            fs.writeFileSync(packagePath, JSON.stringify({
+                name:'globalify-modules'
+            }));
+        };
 
         exec('npm install ' + moduleName + '@"' + version + '"',
         {
@@ -51,19 +64,23 @@ module.exports = function globalify(settings, callback){
         }).stdout.pipe(process.stdout);
     }
 
-    function globalifyCallback(error, data){
-        console.log(error);
-        if(!error){
+    function globalifyCallback(error){
+        if(error){
+            console.log(error);
+            installModule(moduleName, version, function(error){
+                if(error){
+                    console.log(error);
+                    return;
+                }
+                globalifyModule(moduleName, globalifyCallback);
+            });
             return;
         }
-        installModule(moduleName, version, function(error){
-            if(error){
-                console.log(error);
-                return;
-            }
-            globalifyModule(moduleName, globalifyCallback);
-        });
+
+        bundleStream.pipe(outputStream);
     }
 
-    return globalifyModule(moduleName, globalifyCallback);
+    globalifyModule(moduleName, globalifyCallback);
+
+    return outputStream;
 }
