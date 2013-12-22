@@ -55,17 +55,15 @@ module.exports = function globalify(settings, callback){
         },
         function(error){
             callback(error);
-        }).stdout.pipe(process.stdout);
+        });
     }
 
     installModule(moduleName, version, function(error){
         if(error){
-            console.log(error);
+            callback(error);
             return;
         }
-        globalifyModule(moduleName, function(){
-
-        });
+        globalifyModule(moduleName, callback);
     });
 
     return outputStream;

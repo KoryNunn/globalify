@@ -20,7 +20,7 @@ globalify({
     },
     function(error){
         if(error){
-            //something
+            console.log(error);
         }
     }
-).pipe(fs.createWriteStream(outputFileName));
+).pipe(process.stdout);
