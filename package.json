@@ -14,5 +14,5 @@
   },
   "author": "",
   "license": "BSD",
-  "modulesDirectory": "./modules"
+  "installDirectory": "./globalify_modules"
 }

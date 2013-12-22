@@ -1,37 +1,50 @@
-#!/usr/bin/env node
+var browserify = require('browserify'),
+    fs = require('fs'),
+    resumer = require('resumer'),
+    path = require('path'),
+    childProcess = require("child_process"),
+    exec = childProcess.exec,
+    defaults = {
+        installDirectory: './globalify_modules',
+        version: 'x.x.x'
+    };
 
-function globalify(){
-    var program = require('commander'),
-        browserify = require('browserify'),
-        resumer = require('resumer'),
-        path = require('path'),
-        fs = require('fs'),
-        childProcess = require("child_process"),
-        exec = childProcess.exec,
-        packageJson = require('./package.json'),
-        moduleName = process.argv[2],
-        version = process.argv[3] || 'x.x.x',
+module.exports = function globalify(settings, callback){
+
+    settings = settings || {};
+
+    for(var key in defaults){
+        settings[key] = settings[key] || defaults[key];
+    }
+
+    var moduleName = settings.module,
+        version = settings.version,
         outputFileName = moduleName + '-' + version.replace(/\./g,'-') + '.js';
-
-    program
-      .version(packageJson.version)
-      .option('-g, --globalName [globalName]', 'the name of the global to expose')
-      .parse(process.argv);
 
     function globalifyModule(moduleName, callback){
 
-        var stream = resumer().queue('window["' + (program.globalName || moduleName) + '"] = require("' + moduleName + '");').end();
+        var stream = resumer().queue('window["' + (settings.globalVariable || moduleName) + '"] = require("' + moduleName + '");').end();
         var b = browserify({
             entries: [stream],
-            basedir: path.resolve(process.cwd(), packageJson.modulesDirectory)
+            basedir: path.resolve(process.cwd(), settings.installDirectory)
         });
-        b.bundle(callback).pipe(fs.createWriteStream(outputFileName));
+        return b.bundle(callback);
     }
 
-    function instalModule(moduleName, version, callback){
-       exec('npm install ' + moduleName + '@"' + version + '"',
+    function installModule(moduleName, version, callback){
+        var installDirectory = path.resolve(process.cwd(), settings.installDirectory);
+
+        try {
+            if(!fs.lstatSync(installDirectory).isDirectory()){
+                fs.mkdirSync(installDirectory);
+            }
+        } catch (e) {
+            // ...
+        }
+
+        exec('npm install ' + moduleName + '@"' + version + '"',
         {
-            cwd: path.resolve(process.cwd(), packageJson.modulesDirectory)
+            cwd: installDirectory
         },
         function(error){
             callback(error);
@@ -43,7 +56,7 @@ function globalify(){
         if(!error){
             return;
         }
-        instalModule(moduleName, version, function(error){
+        installModule(moduleName, version, function(error){
             if(error){
                 console.log(error);
                 return;
@@ -52,8 +65,5 @@ function globalify(){
         });
     }
 
-    globalifyModule(moduleName, globalifyCallback);
-
+    return globalifyModule(moduleName, globalifyCallback);
 }
-
-globalify();
