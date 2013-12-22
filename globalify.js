@@ -32,21 +32,15 @@ module.exports = function globalify(settings, callback){
             basedir: path.resolve(process.cwd(), settings.installDirectory)
         });
 
-        bundleStream = b.bundle(function(error){
-            callback(error);
-        });
+        bundleStream = b.bundle(callback).pipe(outputStream);
     }
 
     function installModule(moduleName, version, callback){
         var installDirectory = path.resolve(process.cwd(), settings.installDirectory),
             packagePath = path.join(installDirectory, 'package.json');
 
-        try {
-            if(!fs.lstatSync(installDirectory).isDirectory()){
-                fs.mkdirSync(installDirectory);
-            }
-        } catch (e) {
-            // ...
+        if(!fs.existsSync(installDirectory)){
+            fs.mkdirSync(installDirectory);
         }
 
         if(!fs.existsSync(packagePath)){
@@ -64,23 +58,15 @@ module.exports = function globalify(settings, callback){
         }).stdout.pipe(process.stdout);
     }
 
-    function globalifyCallback(error){
+    installModule(moduleName, version, function(error){
         if(error){
             console.log(error);
-            installModule(moduleName, version, function(error){
-                if(error){
-                    console.log(error);
-                    return;
-                }
-                globalifyModule(moduleName, globalifyCallback);
-            });
             return;
         }
+        globalifyModule(moduleName, function(){
 
-        bundleStream.pipe(outputStream);
-    }
-
-    globalifyModule(moduleName, globalifyCallback);
+        });
+    });
 
     return outputStream;
 }
