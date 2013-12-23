@@ -1,9 +1,8 @@
 var browserify = require('browserify'),
     fs = require('fs'),
+    npm = require('npm'),
     resumer = require('resumer'),
     path = require('path'),
-    childProcess = require("child_process"),
-    exec = childProcess.exec,
     stream = require('stream'),
     defaults = {
         installDirectory: './globalify_modules',
@@ -35,6 +34,13 @@ module.exports = function globalify(settings, callback){
         bundleStream = b.bundle(callback).pipe(outputStream);
     }
 
+    function npmInstall(module, version, callback){
+        var nameAndVersion = module + (version ? '@"' + version + '"' : '');
+        npm.commands.install([nameAndVersion], function (error, data) {
+            callback(error);
+        });
+    }
+
     function installModule(moduleName, version, callback){
         var installDirectory = path.resolve(process.cwd(), settings.installDirectory),
             packagePath = path.join(installDirectory, 'package.json');
@@ -47,15 +53,19 @@ module.exports = function globalify(settings, callback){
             fs.writeFileSync(packagePath, JSON.stringify({
                 name:'globalify-modules'
             }));
-        };
+        }
 
-        exec('npm install ' + moduleName + '@"' + version + '"',
-        {
-            cwd: installDirectory
-        },
-        function(error){
-            callback(error);
-        });
+        npm.load({
+                prefix: installDirectory
+            },
+            function(error) {
+                if(!version || version === 'x.x.x'){
+                    npmInstall(moduleName, null, callback);
+                }else{
+                    npmInstall(moduleName, version, callback);
+                }
+            }
+        );
     }
 
     installModule(moduleName, version, function(error){
