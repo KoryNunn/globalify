@@ -7,7 +7,10 @@ var browserify = require('browserify'),
     defaults = {
         installDirectory: './globalify_modules',
         version: 'x.x.x'
-    };
+    },
+    rootPath = __dirname;
+
+console.log(rootPath);
 
 module.exports = function globalify(settings, callback){
 
@@ -28,7 +31,7 @@ module.exports = function globalify(settings, callback){
         var stream = resumer().queue('window["' + (settings.globalVariable || moduleName) + '"] = require("' + moduleName + '");').end();
         var b = browserify({
             entries: [stream],
-            basedir: path.resolve(process.cwd(), settings.installDirectory)
+            basedir: path.resolve(rootPath, settings.installDirectory)
         });
 
         bundleStream = b.bundle(callback).pipe(outputStream);
@@ -42,7 +45,7 @@ module.exports = function globalify(settings, callback){
     }
 
     function installModule(moduleName, version, callback){
-        var installDirectory = path.resolve(process.cwd(), settings.installDirectory),
+        var installDirectory = path.resolve(rootPath, settings.installDirectory),
             packagePath = path.join(installDirectory, 'package.json');
 
         if(!fs.existsSync(installDirectory)){
