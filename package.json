@@ -1,9 +1,11 @@
 {
   "name": "globalify",
   "version": "0.0.4",
-  "description": "",
+  "description": "## Wat",
   "main": "globalify.js",
-  "bin": "./index.js",
+  "bin": {
+    "globalify": "./index.js"
+  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -15,5 +17,14 @@
   },
   "author": "",
   "license": "BSD",
-  "installDirectory": "./globalify_modules"
+  "installDirectory": "./globalify_modules",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/KoryNunn/globalify.git"
+  },
+  "keywords": [],
+  "bugs": {
+    "url": "https://github.com/KoryNunn/globalify/issues"
+  },
+  "homepage": "https://github.com/KoryNunn/globalify#readme"
 }
