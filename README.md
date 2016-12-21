@@ -14,7 +14,7 @@ For easy usage in testing sites like jsperf.com, or jsbin etc etc..
 
     npm -i globalify -g
 
-    globalify gedi 0.10.0 > gedi-0.10.0.js
+    globalify gedi -o gedi-0.10.0.js
 
 ### API:
 
