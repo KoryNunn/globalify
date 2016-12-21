@@ -24,7 +24,7 @@ For easy usage in testing sites like jsperf.com, or jsbin etc etc..
             module: 'gedi',
             version: '0.10.0', // OPTIONAL, Will default to x.x.x
             globalVariable: 'gedi', // OPTIONAL, Will default to the module name.
-            instalDirectory: 'someDir' // OPTIONAL, Will default to globalify_modules
+            installDirectory: 'someDir' // OPTIONAL, Will default to globalify_modules
         },
         function(error){
             // Something went a bit shit.
