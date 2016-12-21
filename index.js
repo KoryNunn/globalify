@@ -13,14 +13,25 @@ program
     .parse(process.argv);
 
 if (program.args.length !== 1) {
-    program.help()
+    program.help();
 }
 
-var moduleNameAndVersion = program.args[0].split('@'),
-    moduleName = moduleNameAndVersion[0],
-    version = moduleNameAndVersion[1] || 'x.x.x';
+var moduleArgument = program.args[0];
 
-var outStream = fs.createWriteStream(program.out || moduleName + '.js');
+var moduleNodes, moduleName, version;
+if (moduleArgument.indexOf('@') === 0) {
+    // scoped package
+    moduleNodes = moduleArgument.slice(1).split('@');
+    moduleName = '@' + moduleNodes[0];
+}
+else {
+    moduleNodes = moduleArgument.split('@');
+    moduleName = moduleNodes[0];
+}
+
+version = moduleNodes[1] || 'x.x.x';
+
+var outStream = fs.createWriteStream(program.out || moduleName.replace('/', '-') + '.js');
 
 globalify({
         module: moduleName,
