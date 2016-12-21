@@ -28,8 +28,8 @@ globalify({
         globalVariable: program.globalVariable,
         installDirectory: packageJson.installDirectory
     },
-    function (error) {
-        if (error) {
+    function(error){
+        if(error){
             console.log(error);
         }
     }
