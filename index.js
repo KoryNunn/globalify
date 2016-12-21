@@ -1,6 +1,5 @@
 #!/usr/bin/env node
-"use strict";
-const program = require('commander'),
+var program = require('commander'),
     globalify = require('./globalify'),
     packageJson = require('./package.json'),
     fs = require('fs');
@@ -17,11 +16,11 @@ if (program.args.length !== 1) {
     program.help()
 }
 
-const moduleNameAndVersion = program.args[0].split('@'),
+var moduleNameAndVersion = program.args[0].split('@'),
     moduleName = moduleNameAndVersion[0],
     version = moduleNameAndVersion[1] || 'x.x.x';
 
-const outStream = fs.createWriteStream(program.out || `${moduleName}.js`);
+var outStream = fs.createWriteStream(program.out || moduleName + '.js');
 
 globalify({
         module: moduleName,
