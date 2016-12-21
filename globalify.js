@@ -10,8 +10,6 @@ var browserify = require('browserify'),
     },
     rootPath = __dirname;
 
-console.log(rootPath);
-
 module.exports = function globalify(settings, callback){
 
     settings = settings || {};

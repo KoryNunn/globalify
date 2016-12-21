@@ -2,26 +2,31 @@
 var program = require('commander'),
     globalify = require('./globalify'),
     packageJson = require('./package.json'),
-    moduleNameAndVersionString = process.argv[2],
     fs = require('fs');
 
-var moduleNameAndVersion = moduleNameAndVersionString.split('@'),
+program
+    .version(packageJson.version)
+    .usage('<module> [options]')
+    .arguments('<module>')
+    .option('-o, --out <outputFileName>', 'the output path')
+    .option('-g, --globalVariable [globalVariable]', 'the name of the global variable to expose')
+    .parse(process.argv);
+
+if (program.args.length !== 1) {
+    program.help()
+}
+
+var moduleNameAndVersion = program.args[0].split('@'),
     moduleName = moduleNameAndVersion[0],
     version = moduleNameAndVersion[1] || 'x.x.x';
 
-program
-  .version(packageJson.version)
-  .option('-g, --globalVariable [globalVariable]', 'the name of the global variable to expose')
-  .option('-o, --out [outputFileName]', 'the output path')
-  .parse(process.argv);
-
-var outStream = fs.createWriteStream(program.out);
+var outStream = fs.createWriteStream(program.out || moduleName + '.js');
 
 globalify({
         module: moduleName,
         version: version,
         globalVariable: program.globalVariable,
-        instalDirectory: packageJson.instalDirectory
+        installDirectory: packageJson.installDirectory
     },
     function(error){
         if(error){
