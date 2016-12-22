@@ -3,7 +3,7 @@ var program = require('commander'),
     globalify = require('./globalify'),
     packageJson = require('./package.json'),
     fs = require('fs'),
-    matchModuleInfo = /^(?:(.+)@|$)(.+$)/;
+    matchModuleInfo = /^(.[^@]*)(?:@([^@]+))?$/;
 
 program
     .version(packageJson.version)
