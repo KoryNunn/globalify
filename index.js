@@ -2,7 +2,8 @@
 var program = require('commander'),
     globalify = require('./globalify'),
     packageJson = require('./package.json'),
-    fs = require('fs');
+    fs = require('fs'),
+    matchModuleInfo = /^(.[^@]*)(?:@([^@]+))?$/;
 
 program
     .version(packageJson.version)
@@ -13,14 +14,20 @@ program
     .parse(process.argv);
 
 if (program.args.length !== 1) {
-    program.help()
+    program.help();
 }
 
-var moduleNameAndVersion = program.args[0].split('@'),
-    moduleName = moduleNameAndVersion[0],
-    version = moduleNameAndVersion[1] || 'x.x.x';
+var moduleArgument = program.args[0],
+    moduleInfoMatch = moduleArgument.match(matchModuleInfo);
 
-var outStream = fs.createWriteStream(program.out || moduleName + '.js');
+if(!moduleInfoMatch){
+    throw new Error('invalid moduleName');
+}
+
+var moduleName = moduleInfoMatch[1],
+    version = moduleInfoMatch[2] || 'x.x.x';
+
+var outStream = fs.createWriteStream(program.out || moduleName.replace(/\//g, '-') + '.js');
 
 globalify({
         module: moduleName,
