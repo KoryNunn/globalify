@@ -23,7 +23,7 @@ For easy usage in testing sites like jsperf.com, or jsbin etc etc..
     globalify({
             module: 'gedi',
             version: '0.10.0', // OPTIONAL, Will default to x.x.x
-            globalVariable: 'gedi', // OPTIONAL, Will default to the module name.
+            globalVariable: 'gedi' or function(moduleName, version){ ... }, // OPTIONAL, Will default to the module name camelCased.
             installDirectory: 'someDir' // OPTIONAL, Will default to globalify_modules
         },
         function(error){

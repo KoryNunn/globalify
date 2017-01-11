@@ -4,6 +4,7 @@ var browserify = require('browserify'),
     resumer = require('resumer'),
     path = require('path'),
     stream = require('stream'),
+    camelCase = require('camelcase'),
     defaults = {
         installDirectory: './globalify_modules',
         version: 'x.x.x'
@@ -26,7 +27,14 @@ module.exports = function globalify(settings, callback){
 
     function globalifyModule(moduleName, callback){
 
-        var stream = resumer().queue('window["' + (settings.globalVariable || moduleName) + '"] = require("' + moduleName + '");').end();
+        var globalIdentifier;
+        if(typeof settings.globalVariable === 'function'){
+            globalIdentifier = settings.globalVariable(moduleName, version);
+        }else{
+            globalIdentifier = settings.globalVariable || camelCase(moduleName);
+        }
+
+        var stream = resumer().queue('window["' + globalIdentifier + '"] = require("' + moduleName + '");').end();
         var b = browserify({
             entries: [stream],
             basedir: path.resolve(rootPath, settings.installDirectory)
