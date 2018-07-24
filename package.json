@@ -7,14 +7,17 @@
     "globalify": "./index.js"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "snyk-protect": "snyk protect",
+    "prepare": "npm run snyk-protect"
   },
   "dependencies": {
     "browserify": "^13.1.1",
     "camelcase": "^4.0.0",
     "commander": "^2.9.0",
     "npm": "^5.10.0",
-    "resumer": "0.0.0"
+    "resumer": "0.0.0",
+    "snyk": "^1.89.0"
   },
   "author": "",
   "license": "MIT",
@@ -27,5 +30,6 @@
   "bugs": {
     "url": "https://github.com/KoryNunn/globalify/issues"
   },
-  "homepage": "https://github.com/KoryNunn/globalify#readme"
+  "homepage": "https://github.com/KoryNunn/globalify#readme",
+  "snyk": true
 }
